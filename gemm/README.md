@@ -47,6 +47,18 @@ Later I was curious if combining this the above shared mem optimization approach
 
 * [shared_mem_coalesce.cu](shared_mem_coalesce.cu)
 
+```diff
+- int tile_row=threadIdx.y;
+- int tile_col=threadIdx.x;
+- int row = blockIdx.x*blockDim.x+tile_row;
+- int col = blockIdx.y*blockDim.y+tile_col;
+// tpb=tile_w*tile_w;
++ int tile_row = threadIdx.x / tile_w;
++ int tile_col = threadIdx.x % tile_w;
++ int row = blockIdx.x * tile_w + tile_row;
++ int col = blockIdx.y * tile_w + tile_col;
+```
+
 | GPU    	| T4     	| H100    	|
 |--------	|--------	|---------	|
 | GFLOPS 	| 671.01 	| 6350.95 	|
