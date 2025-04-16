@@ -7,7 +7,6 @@ __global__ void naive_mm(const float *input_a, const float *input_b, float *outp
 
     if (row < m && col < n)
     {
-        // output_c[row*n+col] = 0.0f;
         float tmp = 0.0f;
         for (int i = 0; i < k; i++)
         {
