@@ -1,6 +1,7 @@
 #include <cuda_runtime.h>
+constexpr int tile_w=32;
 
-__global__ void naive_mm(const float *input_a, const float *input_b, float *output_c, size_t m, size_t n, size_t k, int tile_w)
+__global__ void naive_mm(const float *input_a, const float *input_b, float *output_c, size_t m, size_t n, size_t k)
 {
     // printf("blockIdx.x=%d, blockIdx.y=%d, threadIdx.x=%d, threadIdx.y=%d\n", blockIdx.x, blockIdx.y, threadIdx.x, threadIdx.y);
     int tile_row = threadIdx.x / tile_w;
@@ -9,8 +10,8 @@ __global__ void naive_mm(const float *input_a, const float *input_b, float *outp
     // int tile_col = threadIdx.x;
     int row = blockIdx.x * tile_w + tile_row;
     int col = blockIdx.y * tile_w + tile_col;
-    extern __shared__ float As[];
-    float *Bs = &As[tile_w * tile_w];
+    __shared__ float As[tile_w * tile_w];
+    __shared__ float Bs[tile_w * tile_w];
 
     float result = 0.0f;
     // result_tmp[tile_row*tile_w+tile_col]=0.0f;
@@ -41,5 +42,5 @@ extern "C" void solution(const float *input_a, const float *input_b, float *outp
     dim3 tpb = dim3(tile_w * tile_w);
     dim3 gridDim = dim3((m + tile_w - 1) / tile_w, (n + tile_w - 1) / tile_w);
     size_t shared = tile_w * tile_w * 2 * sizeof(float);
-    naive_mm<<<gridDim, tpb, shared>>>(input_a, input_b, output_c, m, n, k, tile_w);
+    naive_mm<<<gridDim, tpb>>>(input_a, input_b, output_c, m, n, k);
 }
