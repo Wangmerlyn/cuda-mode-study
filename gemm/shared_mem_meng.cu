@@ -5,9 +5,12 @@ __global__ void naive_mm(const float* input_a, const float* input_b, float* outp
     __shared__ float M_TILE[TILE_SIZE][TILE_SIZE];
     __shared__ float N_TILE[TILE_SIZE][TILE_SIZE];
 
+    // Thread indices within a tile
     int icol = threadIdx.x;
     int irow = threadIdx.y;
 
+    // Critical: This thread layout enables memory coalescing
+    // Threads in the same warp (consecutive threadIdx.x) access consecutive memory addresses
     int col = blockIdx.x * blockDim.x + threadIdx.x;
     int row = blockIdx.y * blockDim.y + threadIdx.y;
 
