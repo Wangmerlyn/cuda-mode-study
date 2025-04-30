@@ -62,3 +62,31 @@ Later I was curious if combining this the above shared mem optimization approach
 | GPU    	| T4     	| H100    	|
 |--------	|--------	|---------	|
 | GFLOPS 	| 671.01 	| 6350.95 	|
+
+> **Note:** The `tile_w` is better not set as a function parameter, rather use it as a constexpr or template parameter is the way to go. This is because if `tile_w` is used as a function parameter, compiler can't determine the size of the share memory at compile time. see [cuda mode lecture 5](https://youtu.be/wVsR-YhaHlM?si=x8zn3UBIJZxJXycq&t=3171) for detailed explainations.
+
+> after the `tile_w` fix
+
+| GPU    	| T4     	| H100    	|
+|--------	|--------	|---------	|
+| GFLOPS 	| 881.68	| 8656.04 	|
+
+# Kernel 4. Shared Memory with 1d Tiling
+
+* [tiling_1dblock.cu](tiling_1dblock.cu)
+
+The shared memory mapping for $A$ and $B$ are in the shape of $BM \times BK$ and $BK \times BN$.
+
+In this implementation, $BN = BM$, and there are $BM \times BK$ threads in one block.
+
+Each thread produces $TM$ results.
+
+This gives us a total of:
+$$
+BM \times BK \times TM
+$$
+results in one block, and since $BM \times BK \times TM = BM \times BN$, the total matches the output tile size.
+
+| GPU    	| T4     	| H100    	|
+|--------	|--------	|---------	|
+| GFLOPS 	| 1822.53	| 16038.13 	|
